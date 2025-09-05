@@ -261,9 +261,14 @@ namespace rtxmu
             auto queryPoolInfo = vk::QueryPoolCreateInfo()
                 .setQueryType(vk::QueryType::eAccelerationStructureCompactedSizeKHR)
                 .setQueryCount((uint32_t)size);
-
+#if !defined(VULKAN_HPP_NO_EXCEPTIONS)
             queryPool = m_allocator->device.createQueryPool(queryPoolInfo, nullptr, VkBlock::getDispatchLoader());
-
+#else
+            auto [vkResult, queryPool] = m_allocator->device.createQueryPool(queryPoolInfo, nullptr, VkBlock::getDispatchLoader());
+            if (vkResult != vk::Result::eSuccess) {
+                throw std::runtime_error(VULKAN_HPP_NAMESPACE_STRING "::device::createQueryPool");
+            }
+#endif
             if (Logger::isEnabled(Level::DBG))
             {
                 char buf[128];
